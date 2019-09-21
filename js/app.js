@@ -49,9 +49,9 @@ window.onload = function () {
     });
 
     function changeCount() {
-        let count=0;// = listTODO.length - completedThereAll.length;
-        for (let i=0;i<listTODO.length;i++){
-            if (listTODO[i].status==="false"){
+        let count = 0;// = listTODO.length - completedThereAll.length;
+        for (let i = 0; i < listTODO.length; i++) {
+            if (listTODO[i].status === "false") {
                 count++;
             }
         }
@@ -73,7 +73,7 @@ window.onload = function () {
                         if ((completedThereAll.length + 1) === listTODO.length) {
                             toggle_all.checked = true;
                         }
-                        listTODO[i].status="true";
+                        listTODO[i].status = "true";
                         changeCount();
                     } else {
                         event.target.parentElement.parentElement.classList.remove("completed");
@@ -81,7 +81,7 @@ window.onload = function () {
                             clear_completed.style.display = "none";
                             toggle_all.checked = false;
                         }
-                        listTODO[i].status="false";
+                        listTODO[i].status = "false";
                         changeCount();
                     }
                     break;
@@ -177,7 +177,7 @@ window.onload = function () {
     function addNewLi(item) {
         let todoLi = document.createElement('li');
         todoLi.id = item.id;
-        if (JSON.parse(item.status)){
+        if (JSON.parse(item.status)) {
             todoLi.classList.add("completed");
         }
         let todoLiDiv = document.createElement('div');
@@ -186,7 +186,7 @@ window.onload = function () {
         let todoLiDivInputCheck = document.createElement('input');
         todoLiDivInputCheck.classList.add("toggle");
         todoLiDivInputCheck.type = "checkbox";
-        todoLiDivInputCheck.checked=   JSON.parse(item.status);
+        todoLiDivInputCheck.checked = JSON.parse(item.status);
 
 
         let todoLiDivLabel = document.createElement('label');
