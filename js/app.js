@@ -8,28 +8,48 @@ window.onload = function () {
     let clear_completed = document.querySelector(".clear-completed");
     let todo_count = document.querySelector(".todo-count");
     let filters = document.querySelector(".filters");
+    let editing = document.querySelector(".editing");
+
+    // console.log(event.target.parentElement);
+    function checkEditing(elementEditing) {
+        console.log(elementEditing);
+        elementEditing.addEventListener("focusout", includEvent);
+    }
+
+    function includEvent(event) {
+        //console.log(
+        event.target.parentElement.classList.remove('editing');
+        event.target.parentElement.firstChild.childNodes[1].textContent = event.target.value;
+        //console.log( event.target.value);
+    }
 
     todo_list.addEventListener("click", checkedItem);
     filters.addEventListener("click", filters3Case);
 
     function filters3Case(event) {
         let arrCompleted = [];
+        let oldSelected = document.querySelector('.selected');
+        if (oldSelected) {
+            oldSelected.classList.remove('selected');
+        }
         switch (event.srcElement.innerHTML) {
             case `All`:
+                event.target.className = 'selected';
                 addListLi(listTODO);
                 break;
             case `Active`:
+                event.target.className = 'selected';
                 for (let i = 0; i < listTODO.length; i++) {
-                    if (listTODO[i].status === "false") {
+                    if (listTODO[i].status === false) {
                         arrCompleted.push(listTODO[i]);
                     }
                 }
                 addListLi(arrCompleted);
                 break;
             case `Completed`:
-
+                event.target.className = 'selected';
                 for (let i = 0; i < listTODO.length; i++) {
-                    if (listTODO[i].status === "true") {
+                    if (listTODO[i].status === true) {
                         arrCompleted.push(listTODO[i]);
                     }
                 }
@@ -43,23 +63,31 @@ window.onload = function () {
 
     // двойной клик на поле. происходит херня, схлопывается поле
     todo_list.addEventListener("dblclick", function (event) {
-        if (event.target.toString() === "[object HTMLLabelElement]") {
+        // console.log(event.target.localName);
+        if (event.target.localName === "label") {
             event.target.parentElement.parentElement.classList.add("editing");
+            editing = event.target.parentElement.parentElement;
+            event.target.parentElement.parentElement.lastChild.focus();
+            //console.log(event.target.parentElement.parentElement.lastChild);
+            checkEditing(event.target.parentElement.parentElement);
         }
+
     });
+
 
     function changeCount() {
         let count = 0;// = listTODO.length - completedThereAll.length;
         for (let i = 0; i < listTODO.length; i++) {
-            if (listTODO[i].status === "false") {
+            if (listTODO[i].status === false) {
                 count++;
             }
         }
-        if (count <= 1) {
+        if (count === 1) {
             todo_count.innerHTML = `<strong>${count}</strong> item left`;
         } else {
             todo_count.innerHTML = `<strong>${count}</strong> items left`;
         }
+
     }
 
     function checkedItem(event) {
@@ -73,25 +101,28 @@ window.onload = function () {
                         if ((completedThereAll.length + 1) === listTODO.length) {
                             toggle_all.checked = true;
                         }
-                        listTODO[i].status = "true";
-                        changeCount();
+                        // listTODO[i].status = true;
+                        //changeCount();
                     } else {
                         event.target.parentElement.parentElement.classList.remove("completed");
                         if (!(completedThereAll.length - 1)) {
                             clear_completed.style.display = "none";
                             toggle_all.checked = false;
                         }
-                        listTODO[i].status = "false";
-                        changeCount();
+                        //listTODO[i].status = false;
                     }
-                    break;
+                    listTODO[i].status = event.target.checked;
+
+                    i = listTODO.length;
                 }
 
             }
+            changeCount();
         }
     }
 
     toggle_all.addEventListener("click", checkAll);
+
     clear_completed.addEventListener("click", function () {
         toggle_all.checked = false;
         let completedList = document.querySelectorAll('.completed');
@@ -100,11 +131,17 @@ window.onload = function () {
                 if (element.id === Number(completedList[i].id)) {
                     listTODO.splice(ii, 1);
                     document.getElementById(completedList[i].id).remove();
-                    break;
+                    ii = listTODO.length;
                 }
             });
         }
         checkAll();
+        changeCount();
+        if (listTODO.length === 0) {
+            main.style.display = "none";
+            footer.style.display = "none";
+            clear_completed.style.display = "none";
+        }
     });
 
     function checkAll() {
@@ -114,13 +151,11 @@ window.onload = function () {
             if (toggle_all.checked) {
                 CheckboxList[i].parentElement.parentElement.classList.add("completed");
                 clear_completed.style.display = "block";
-                changeStatus("false");
-
             } else {
                 CheckboxList[i].parentElement.parentElement.classList.remove("completed");
                 clear_completed.style.display = "none";
-                changeStatus("true");
             }
+            changeStatus(toggle_all.checked);
             changeCount();
         }
     }
@@ -136,7 +171,7 @@ window.onload = function () {
     function ClassTODO(message, id, status) {
         this.id = id || listTODO.length > 0 ? listTODO[listTODO.length - 1].id + 1 : Date.now();
         this.message = message;
-        this.status = status || "false";
+        this.status = status || false;
         return this;
     }
 
@@ -159,7 +194,6 @@ window.onload = function () {
                 footer.style.display = "block";
                 changeCount();
             }
-            // console.log(listTODO);
         }
     };
 
@@ -177,7 +211,7 @@ window.onload = function () {
     function addNewLi(item) {
         let todoLi = document.createElement('li');
         todoLi.id = item.id;
-        if (JSON.parse(item.status)) {
+        if (item.status) {
             todoLi.classList.add("completed");
         }
         let todoLiDiv = document.createElement('div');
@@ -186,7 +220,7 @@ window.onload = function () {
         let todoLiDivInputCheck = document.createElement('input');
         todoLiDivInputCheck.classList.add("toggle");
         todoLiDivInputCheck.type = "checkbox";
-        todoLiDivInputCheck.checked = JSON.parse(item.status);
+        todoLiDivInputCheck.checked = item.status;
 
 
         let todoLiDivLabel = document.createElement('label');
@@ -197,7 +231,7 @@ window.onload = function () {
 
         let todoLiDivInputEdit = document.createElement('input');
         todoLiDivInputEdit.classList.add("edit");
-        todoLiDivInputEdit.type = "checkbox";
+        todoLiDivInputEdit.value = item.message;
 
         todoLiDiv.appendChild(todoLiDivInputCheck);
         todoLiDiv.appendChild(todoLiDivLabel);
