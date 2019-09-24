@@ -8,7 +8,7 @@ window.onload = function () {
     let clear_completed = document.querySelector(".clear-completed");
     let todo_count = document.querySelector(".todo-count");
     let filters = document.querySelector(".filters");
-    let editing = document.querySelector(".editing");
+    //let editing = document.querySelector(".editing");
 
     // console.log(event.target.parentElement);
     function checkEditing(elementEditing) {
@@ -17,13 +17,17 @@ window.onload = function () {
     }
 
     function includEvent(event) {
-        //console.log(
         event.target.parentElement.classList.remove('editing');
         event.target.parentElement.firstChild.childNodes[1].textContent = event.target.value;
-        //console.log( event.target.value);
+        listTODO.find(function (element) {
+            if (element.id === Number(event.target.parentElement.id)){
+                element.message=event.target.value;
+            }
+        });
     }
 
     todo_list.addEventListener("click", checkedItem);
+
     filters.addEventListener("click", filters3Case);
 
     function filters3Case(event) {
@@ -39,20 +43,12 @@ window.onload = function () {
                 break;
             case `Active`:
                 event.target.className = 'selected';
-                for (let i = 0; i < listTODO.length; i++) {
-                    if (listTODO[i].status === false) {
-                        arrCompleted.push(listTODO[i]);
-                    }
-                }
+                arrCompleted = listTODO.filter(element=> element.status===false);
                 addListLi(arrCompleted);
                 break;
             case `Completed`:
                 event.target.className = 'selected';
-                for (let i = 0; i < listTODO.length; i++) {
-                    if (listTODO[i].status === true) {
-                        arrCompleted.push(listTODO[i]);
-                    }
-                }
+                arrCompleted = listTODO.filter(element=> element.status===true);
                 addListLi(arrCompleted);
                 break;
             default :
@@ -61,27 +57,24 @@ window.onload = function () {
         }
     }
 
-    // двойной клик на поле. происходит херня, схлопывается поле
     todo_list.addEventListener("dblclick", function (event) {
-        // console.log(event.target.localName);
         if (event.target.localName === "label") {
             event.target.parentElement.parentElement.classList.add("editing");
-            editing = event.target.parentElement.parentElement;
             event.target.parentElement.parentElement.lastChild.focus();
-            //console.log(event.target.parentElement.parentElement.lastChild);
             checkEditing(event.target.parentElement.parentElement);
         }
-
     });
 
 
     function changeCount() {
         let count = 0;// = listTODO.length - completedThereAll.length;
-        for (let i = 0; i < listTODO.length; i++) {
-            if (listTODO[i].status === false) {
-                count++;
-            }
-        }
+        let statusFalse = listTODO.filter(element=> element.status===false);
+        count = statusFalse.length;
+        // for (let i = 0; i < listTODO.length; i++) {
+        //     if (listTODO[i].status === false) {
+        //         count++;
+        //     }
+        // }
         if (count === 1) {
             todo_count.innerHTML = `<strong>${count}</strong> item left`;
         } else {
@@ -101,21 +94,16 @@ window.onload = function () {
                         if ((completedThereAll.length + 1) === listTODO.length) {
                             toggle_all.checked = true;
                         }
-                        // listTODO[i].status = true;
-                        //changeCount();
                     } else {
                         event.target.parentElement.parentElement.classList.remove("completed");
                         if (!(completedThereAll.length - 1)) {
                             clear_completed.style.display = "none";
                             toggle_all.checked = false;
                         }
-                        //listTODO[i].status = false;
                     }
                     listTODO[i].status = event.target.checked;
-
                     i = listTODO.length;
                 }
-
             }
             changeCount();
         }
@@ -161,9 +149,12 @@ window.onload = function () {
     }
 
     function changeStatus(status) {
-        for (let i = 0; i < listTODO.length; i++) {
-            listTODO[i].status = status;
-        }
+        listTODO.forEach((element) => {
+            element.status=status;
+        });
+        // for (let i = 0; i < listTODO.length; i++) {
+        //     listTODO[i].status = status;
+        // }
     }
 
     let listTODO = [];
@@ -180,22 +171,28 @@ window.onload = function () {
     footer.style.display = "none";
     clear_completed.style.display = "none";
 
-    new_todo.autofocus = true;
+    //new_todo.autofocus = true;
+    new_todo.focus();
+    new_todo.addEventListener("focusout", addNewItem);
 
     document.onkeyup = function (e) {
         e = e || window.e;
         if (e.keyCode === 13) { //  что за прикол с этим параметром keyCode? мне его вебшторм перечеркивает.
-            if (new_todo.value.trim()) {
-                let newItem = new ClassTODO(new_todo.value.trim());
-                addNewLi(newItem);
-                listTODO.push(newItem);
-                new_todo.value = "";
-                main.style.display = "block";
-                footer.style.display = "block";
-                changeCount();
-            }
+            addNewItem();
         }
     };
+
+    function addNewItem() {
+        if (new_todo.value.trim()) {
+            let newItem = new ClassTODO(new_todo.value.trim());
+            addNewLi(newItem);
+            listTODO.push(newItem);
+            new_todo.value = "";
+            main.style.display = "block";
+            footer.style.display = "block";
+            changeCount();
+        }
+    }
 
     function addListLi(arrItems) {
         todo_list.innerHTML = "";
