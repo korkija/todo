@@ -1,5 +1,21 @@
 window.onload = function () {
 
+
+    function ClassTODO(message, id, status) {
+        this.id = id || listTODO.length > 0 ? listTODO[listTODO.length - 1].id + 1 : Date.now();
+        this.message = message;
+        this.status = status || false;
+        return this;
+    }
+    let listTODO = [];
+    if (localStorage.getItem("arrToDoList")){
+        listTODO = JSON.parse(localStorage.getItem("arrToDoList"));//.split(",") ;
+    }
+
+    //let //|| [];
+    //let listTODO = JSON.parse(localStorage.getItem("arrToDoList")) || [];
+    //let
+
     let main = document.querySelector(".main");
     let footer = document.querySelector(".footer");
     let new_todo = document.querySelector(".new-todo");
@@ -8,6 +24,13 @@ window.onload = function () {
     let clear_completed = document.querySelector(".clear-completed");
     let todo_count = document.querySelector(".todo-count");
     let filters = document.querySelector(".filters");
+
+    addListLi(listTODO);
+    // we don't have TODO
+    showMainFooter();
+
+    new_todo.focus();
+    new_todo.addEventListener("focusout", addNewItem);
 
     function checkEditing(elementEditing) {
         console.log(elementEditing);
@@ -19,12 +42,13 @@ window.onload = function () {
         editing.classList.remove('editing');
         let inputEditing = editing.querySelector(".edit");
         let labelEditing = editing.querySelector("label");
-        labelEditing.textContent=inputEditing.value;
+        labelEditing.textContent = inputEditing.value;
         listTODO.find(function (element) {
             if (element.id === Number(editing.id)) {
                 element.message = inputEditing.value;
             }
         });
+        localStorage.setItem("arrToDoList",JSON.stringify(listTODO));
     }
 
     todo_list.addEventListener("click", checkedItem);
@@ -98,8 +122,15 @@ window.onload = function () {
                         }
                     }
                     listTODO[i].status = event.target.checked;
+                    localStorage.setItem("arrToDoList",JSON.stringify(listTODO));
                     i = listTODO.length;
                 }
+            }
+            let resultCompletedThereAll = document.querySelectorAll(".completed");
+            if (resultCompletedThereAll.length===listTODO.length){
+                toggle_all.checked=true;
+            } else {
+                toggle_all.checked=false;
             }
             changeCount();
         }
@@ -118,14 +149,19 @@ window.onload = function () {
                 }
             });
         }
+        localStorage.setItem("arrToDoList",JSON.stringify(listTODO));
         checkAll();
         changeCount();
+        showMainFooter();
+    });
+
+    function showMainFooter() {
         if (listTODO.length === 0) {
             main.style.display = "none";
             footer.style.display = "none";
             clear_completed.style.display = "none";
         }
-    });
+    }
 
     function checkAll() {
         let CheckboxList = document.querySelectorAll('.toggle');
@@ -147,25 +183,9 @@ window.onload = function () {
         listTODO.forEach((element) => {
             element.status = status;
         });
+        localStorage.setItem("arrToDoList",JSON.stringify(listTODO));
     }
 
-    let listTODO = [];
-
-    function ClassTODO(message, id, status) {
-        this.id = id || listTODO.length > 0 ? listTODO[listTODO.length - 1].id + 1 : Date.now();
-        this.message = message;
-        this.status = status || false;
-        return this;
-    }
-
-    // we don't have TODO
-    main.style.display = "none";
-    footer.style.display = "none";
-    clear_completed.style.display = "none";
-
-    //new_todo.autofocus = true;
-    new_todo.focus();
-    new_todo.addEventListener("focusout", addNewItem);
 
     document.onkeyup = function (e) {
         e = e || window.e;
@@ -189,6 +209,7 @@ window.onload = function () {
             new_todo.value = "";
             main.style.display = "block";
             footer.style.display = "block";
+            localStorage.setItem("arrToDoList",JSON.stringify(listTODO));
             changeCount();
         }
     }
