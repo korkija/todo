@@ -8,20 +8,21 @@ window.onload = function () {
     let clear_completed = document.querySelector(".clear-completed");
     let todo_count = document.querySelector(".todo-count");
     let filters = document.querySelector(".filters");
-    //let editing = document.querySelector(".editing");
 
-    // console.log(event.target.parentElement);
     function checkEditing(elementEditing) {
         console.log(elementEditing);
         elementEditing.addEventListener("focusout", includEvent);
     }
 
-    function includEvent(event) {
-        event.target.parentElement.classList.remove('editing');
-        event.target.parentElement.firstChild.childNodes[1].textContent = event.target.value;
+    function includEvent() {
+        let editing = document.querySelector(".editing");
+        editing.classList.remove('editing');
+        let inputEditing = editing.querySelector(".edit");
+        let labelEditing = editing.querySelector("label");
+        labelEditing.textContent=inputEditing.value;
         listTODO.find(function (element) {
-            if (element.id === Number(event.target.parentElement.id)){
-                element.message=event.target.value;
+            if (element.id === Number(editing.id)) {
+                element.message = inputEditing.value;
             }
         });
     }
@@ -43,12 +44,12 @@ window.onload = function () {
                 break;
             case `Active`:
                 event.target.className = 'selected';
-                arrCompleted = listTODO.filter(element=> element.status===false);
+                arrCompleted = listTODO.filter(element => element.status === false);
                 addListLi(arrCompleted);
                 break;
             case `Completed`:
                 event.target.className = 'selected';
-                arrCompleted = listTODO.filter(element=> element.status===true);
+                arrCompleted = listTODO.filter(element => element.status === true);
                 addListLi(arrCompleted);
                 break;
             default :
@@ -68,13 +69,8 @@ window.onload = function () {
 
     function changeCount() {
         let count = 0;// = listTODO.length - completedThereAll.length;
-        let statusFalse = listTODO.filter(element=> element.status===false);
+        let statusFalse = listTODO.filter(element => element.status === false);
         count = statusFalse.length;
-        // for (let i = 0; i < listTODO.length; i++) {
-        //     if (listTODO[i].status === false) {
-        //         count++;
-        //     }
-        // }
         if (count === 1) {
             todo_count.innerHTML = `<strong>${count}</strong> item left`;
         } else {
@@ -119,7 +115,6 @@ window.onload = function () {
                 if (element.id === Number(completedList[i].id)) {
                     listTODO.splice(ii, 1);
                     document.getElementById(completedList[i].id).remove();
-                    ii = listTODO.length;
                 }
             });
         }
@@ -150,11 +145,8 @@ window.onload = function () {
 
     function changeStatus(status) {
         listTODO.forEach((element) => {
-            element.status=status;
+            element.status = status;
         });
-        // for (let i = 0; i < listTODO.length; i++) {
-        //     listTODO[i].status = status;
-        // }
     }
 
     let listTODO = [];
@@ -178,7 +170,14 @@ window.onload = function () {
     document.onkeyup = function (e) {
         e = e || window.e;
         if (e.keyCode === 13) { //  что за прикол с этим параметром keyCode? мне его вебшторм перечеркивает.
-            addNewItem();
+            if (new_todo.value.trim()) {
+                addNewItem();
+            } else {
+                let editing = document.querySelector(".editing");
+                if (editing) {
+                    includEvent();
+                }
+            }
         }
     };
 
@@ -236,8 +235,6 @@ window.onload = function () {
         todoLi.appendChild(todoLiDiv);
         todoLi.appendChild(todoLiDivInputEdit);
         todo_list.appendChild(todoLi);
-
-//        localStorage.setItem("html", divTable.innerHTML);
     }
 };
 
